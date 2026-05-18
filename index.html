@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Productos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>Lista de Productos</h1>
+
+    <input type="text" id="nombre" placeholder="Nombre">
+    <input type="number" id="precio" placeholder="Precio">
+    <input type="number" id="stock" placeholder="Stock" min="0">
+    <input type="text" id="marca" placeholder="Marca">
+
+    <button onclick="crearProducto()">
+        Agregar
+    </button>
+
+    <ul id="lista"></ul>
+
+    <input type="number" id="buscarId" placeholder="Buscar por ID">
+
+    <button onclick="buscarPorId()">
+        Buscar
+    </button>
+
+    <ul id="resultadoBusqueda"></ul>
+
+    <script src="app.js"></script>
+</body>
+</html>
