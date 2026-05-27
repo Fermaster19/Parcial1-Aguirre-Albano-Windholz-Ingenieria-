@@ -18,10 +18,14 @@ Aplicación CRUD de inventario de productos que cumple **arquitectura MVC** y tr
 
 | Capa | Responsabilidad | Archivos |
 |------|-----------------|----------|
-| **Modelo** | Datos y lógica de persistencia | `models/Producto.js`, `models/ProductoModel.js` |
+| **Entidad** | Objeto de dominio (datos del producto) | `models/Producto.js` |
+| **Modelo** | Solo persistencia CRUD (SQL) | `models/ProductoModel.js` |
+| **Servicio** | Lógica de negocio; usa Strategy y Decorator | `services/ProductoService.js` |
 | **Vista** | No aplica en API REST (la respuesta JSON es la salida) | — |
-| **Controlador** | Intermediario HTTP, orquesta modelo y patrones | `controllers/ProductoController.js` |
+| **Controlador** | Solo HTTP: validación de request, status y JSON | `controllers/ProductoController.js` |
 | **Rutas** | Enrutamiento Express | `routes/productoRoutes.js` |
+
+`Producto` es la entidad; `ProductoModel` accede a MySQL; `ProductoService` aplica el cálculo de precio (Strategy) y el armado de la descripción (Decorator) antes de devolver datos al controlador.
 
 ### Frontend (`public/js/`)
 
@@ -69,6 +73,7 @@ Parcial-1/
 │   ├── config/
 │   │   └── DatabaseSingleton.js
 │   ├── models/
+│   ├── services/
 │   ├── controllers/
 │   ├── routes/
 │   └── patterns/

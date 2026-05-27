@@ -1,32 +1,14 @@
-const ProductoModel = require('../models/ProductoModel');
-const { PrecioContexto } = require('../patterns/strategy/PrecioStrategy');
-const { decorarProducto } = require('../patterns/decorator/ProductoDecorator');
+const ProductoService = require('../services/ProductoService');
 
 class ProductoController {
-    constructor() {
-        this.modelo = new ProductoModel();
-        this.precioContexto = new PrecioContexto();
+    constructor(servicio = new ProductoService()) {
+        this.servicio = servicio;
     }
 
     async listar(req, res) {
         try {
             const estrategia = req.query.estrategia || 'lista';
-            this.precioContexto.establecerEstrategia(estrategia);
-
-            const productos = await this.modelo.obtenerTodos();
-
-            const respuesta = productos.map((producto) => {
-                const decorado = decorarProducto(producto);
-                const precioCalculado = this.precioContexto.calcularPrecio(producto);
-
-                return {
-                    ...producto.toJSON(),
-                    precioCalculado,
-                    estrategia: this.precioContexto.getTipoActual(),
-                    descripcion: decorado.obtenerDescripcion()
-                };
-            });
-
+            const respuesta = await this.servicio.listarConPresentacion(estrategia);
             res.json(respuesta);
         } catch (error) {
             res.status(500).json({ mensaje: 'Error al listar productos', error: error.message });
@@ -42,22 +24,13 @@ class ProductoController {
 
         try {
             const estrategia = req.query.estrategia || 'lista';
-            this.precioContexto.establecerEstrategia(estrategia);
-
-            const producto = await this.modelo.obtenerPorId(id);
+            const producto = await this.servicio.obtenerPorIdConPresentacion(id, estrategia);
 
             if (!producto) {
                 return res.status(404).json({ mensaje: 'Producto no encontrado' });
             }
 
-            const decorado = decorarProducto(producto);
-
-            res.json({
-                ...producto.toJSON(),
-                precioCalculado: this.precioContexto.calcularPrecio(producto),
-                estrategia: this.precioContexto.getTipoActual(),
-                descripcion: decorado.obtenerDescripcion()
-            });
+            res.json(producto);
         } catch (error) {
             res.status(500).json({ mensaje: 'Error al buscar producto', error: error.message });
         }
@@ -66,7 +39,7 @@ class ProductoController {
     async crear(req, res) {
         try {
             const { nombre, precio, stock, marca } = req.body;
-            await this.modelo.crear({ nombre, precio, stock, marca });
+            await this.servicio.crear({ nombre, precio, stock, marca });
             res.json({ mensaje: 'Producto creado' });
         } catch (error) {
             res.status(500).json({ mensaje: 'Error al crear producto', error: error.message });
@@ -77,7 +50,7 @@ class ProductoController {
         try {
             const { id } = req.params;
             const { nombre, precio, stock, marca } = req.body;
-            await this.modelo.actualizar(id, { nombre, precio, stock, marca });
+            await this.servicio.actualizar(id, { nombre, precio, stock, marca });
             res.json({ mensaje: 'Producto actualizado' });
         } catch (error) {
             res.status(500).json({ mensaje: 'Error al actualizar producto', error: error.message });
@@ -87,7 +60,7 @@ class ProductoController {
     async eliminar(req, res) {
         try {
             const { id } = req.params;
-            await this.modelo.eliminar(id);
+            await this.servicio.eliminar(id);
             res.json({ mensaje: 'Producto eliminado' });
         } catch (error) {
             res.status(500).json({ mensaje: 'Error al eliminar producto', error: error.message });
