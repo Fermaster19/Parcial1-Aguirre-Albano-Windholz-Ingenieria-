@@ -25,7 +25,7 @@ Aplicación CRUD de inventario de productos que cumple **arquitectura MVC** y tr
 | **Controlador** | Solo HTTP: validación de request, status y JSON | `controllers/ProductoController.js` |
 | **Rutas** | Enrutamiento Express | `routes/productoRoutes.js` |
 
-`Producto` es la entidad; `ProductoModel` accede a MySQL; `ProductoService` aplica el cálculo de precio (Strategy) y el armado de la descripción (Decorator) antes de devolver datos al controlador.
+**Separación de responsabilidades — Datos vs Lógica:** `Producto` es la entidad de dominio: solo almacena los campos del producto (`id`, `nombre`, `precio`, `stock`, `marca`) y expone `toJSON()` para serializarse; no tiene acceso a la base de datos ni reglas de negocio. `ProductoModel` es exclusivamente la capa de persistencia: ejecuta las consultas SQL sobre MySQL a través de `DatabaseSingleton` y convierte las filas en instancias de `Producto`, sin conocer nada de precios ni descripciones. Toda la lógica de negocio —el cálculo de precio según Strategy y el armado de la descripción mediante Decorator— reside únicamente en `ProductoService`, que orquesta modelo y patrones antes de devolver los datos listos al controlador.
 
 ### Frontend (`public/js/`)
 
