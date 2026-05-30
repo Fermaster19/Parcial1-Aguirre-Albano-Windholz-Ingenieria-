@@ -45,6 +45,19 @@ Garantiza **una única conexión** a MySQL en toda la aplicación.
 const db = DatabaseSingleton.obtenerInstancia();
 ```
 
+**Trade-off: Conexión única vs Connection Pool**
+
+Este MVP implementa Singleton con una **conexión única**:
+- ✅ **Ventajas:** Simplicidad, bajo consumo de memoria, fácil de mantener
+- ❌ **Limitaciones:** No es escalable; con muchos requests concurrentes, todos usan la misma conexión (cuello de botella)
+
+**Para producción**, es recomendable usar **Connection Pool** (`mysql2.createPool()`):
+- Múltiples conexiones reutilizables → mejor concurrencia
+- Si una conexión falla, otras siguen disponibles → mayor resiliencia
+- Costo: mayor consumo de memoria
+
+**Decisión para este proyecto:** Singleton es suficiente y preferible por su simplicidad en un MVP.
+
 ### 2. Decorator (`src/patterns/decorator/ProductoDecorator.js`)
 
 Añade dinámicamente etiquetas a la descripción del producto:
