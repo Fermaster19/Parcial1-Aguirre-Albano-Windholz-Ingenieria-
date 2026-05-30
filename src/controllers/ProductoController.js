@@ -5,6 +5,51 @@ class ProductoController {
         this.servicio = servicio;
     }
 
+    _parsearId(idParam) {
+        const id = Number(idParam);
+        if (!Number.isInteger(id) || id <= 0) {
+            return null;
+        }
+        return id;
+    }
+
+    _validarDatosProducto(body) {
+        const { nombre, precio, stock, marca } = body ?? {};
+
+        if (nombre === undefined || nombre === null || String(nombre).trim() === '') {
+            return { error: 'El nombre es obligatorio' };
+        }
+
+        if (marca === undefined || marca === null || String(marca).trim() === '') {
+            return { error: 'La marca es obligatoria' };
+        }
+
+        const precioNum = Number(precio);
+        if (precio === undefined || precio === null || Number.isNaN(precioNum) || precioNum < 0) {
+            return { error: 'El precio debe ser un número mayor o igual a 0' };
+        }
+
+        const stockNum = Number(stock);
+        if (
+            stock === undefined ||
+            stock === null ||
+            Number.isNaN(stockNum) ||
+            !Number.isInteger(stockNum) ||
+            stockNum < 0
+        ) {
+            return { error: 'El stock debe ser un entero mayor o igual a 0' };
+        }
+
+        return {
+            datos: {
+                nombre: String(nombre).trim(),
+                marca: String(marca).trim(),
+                precio: precioNum,
+                stock: stockNum
+            }
+        };
+    }
+
     async listar(req, res) {
         try {
             const estrategia = req.query.estrategia || 'lista';
@@ -16,9 +61,9 @@ class ProductoController {
     }
 
     async obtenerPorId(req, res) {
-        const id = Number(req.params.id);
+        const id = this._parsearId(req.params.id);
 
-        if (!Number.isInteger(id) || id <= 0) {
+        if (!id) {
             return res.status(400).json({ mensaje: 'ID inválido' });
         }
 
@@ -37,9 +82,13 @@ class ProductoController {
     }
 
     async crear(req, res) {
+        const validacion = this._validarDatosProducto(req.body);
+        if (validacion.error) {
+            return res.status(400).json({ mensaje: validacion.error });
+        }
+
         try {
-            const { nombre, precio, stock, marca } = req.body;
-            await this.servicio.crear({ nombre, precio, stock, marca });
+            await this.servicio.crear(validacion.datos);
             res.json({ mensaje: 'Producto creado' });
         } catch (error) {
             res.status(500).json({ mensaje: 'Error al crear producto', error: error.message });
@@ -47,10 +96,18 @@ class ProductoController {
     }
 
     async actualizar(req, res) {
+        const id = this._parsearId(req.params.id);
+        if (!id) {
+            return res.status(400).json({ mensaje: 'ID inválido' });
+        }
+
+        const validacion = this._validarDatosProducto(req.body);
+        if (validacion.error) {
+            return res.status(400).json({ mensaje: validacion.error });
+        }
+
         try {
-            const { id } = req.params;
-            const { nombre, precio, stock, marca } = req.body;
-            await this.servicio.actualizar(id, { nombre, precio, stock, marca });
+            await this.servicio.actualizar(id, validacion.datos);
             res.json({ mensaje: 'Producto actualizado' });
         } catch (error) {
             res.status(500).json({ mensaje: 'Error al actualizar producto', error: error.message });
@@ -58,8 +115,12 @@ class ProductoController {
     }
 
     async eliminar(req, res) {
+        const id = this._parsearId(req.params.id);
+        if (!id) {
+            return res.status(400).json({ mensaje: 'ID inválido' });
+        }
+
         try {
-            const { id } = req.params;
             await this.servicio.eliminar(id);
             res.json({ mensaje: 'Producto eliminado' });
         } catch (error) {
