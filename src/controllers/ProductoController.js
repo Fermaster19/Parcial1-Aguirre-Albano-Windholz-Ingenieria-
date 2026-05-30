@@ -1,4 +1,5 @@
 const ProductoService = require('../services/ProductoService');
+const ValidationError = require('../errors/ValidationError');
 
 class ProductoController {
     constructor(servicio = new ProductoService()) {
@@ -13,41 +14,11 @@ class ProductoController {
         return id;
     }
 
-    _validarDatosProducto(body) {
-        const { nombre, precio, stock, marca } = body ?? {};
-
-        if (nombre === undefined || nombre === null || String(nombre).trim() === '') {
-            return { error: 'El nombre es obligatorio' };
+    _responderError(res, error, mensajeError) {
+        if (error instanceof ValidationError) {
+            return res.status(400).json({ mensaje: error.message });
         }
-
-        if (marca === undefined || marca === null || String(marca).trim() === '') {
-            return { error: 'La marca es obligatoria' };
-        }
-
-        const precioNum = Number(precio);
-        if (precio === undefined || precio === null || Number.isNaN(precioNum) || precioNum < 0) {
-            return { error: 'El precio debe ser un número mayor o igual a 0' };
-        }
-
-        const stockNum = Number(stock);
-        if (
-            stock === undefined ||
-            stock === null ||
-            Number.isNaN(stockNum) ||
-            !Number.isInteger(stockNum) ||
-            stockNum < 0
-        ) {
-            return { error: 'El stock debe ser un entero mayor o igual a 0' };
-        }
-
-        return {
-            datos: {
-                nombre: String(nombre).trim(),
-                marca: String(marca).trim(),
-                precio: precioNum,
-                stock: stockNum
-            }
-        };
+        return res.status(500).json({ mensaje: mensajeError, error: error.message });
     }
 
     async listar(req, res) {
@@ -56,7 +27,7 @@ class ProductoController {
             const respuesta = await this.servicio.listarConPresentacion(estrategia);
             res.json(respuesta);
         } catch (error) {
-            res.status(500).json({ mensaje: 'Error al listar productos', error: error.message });
+            this._responderError(res, error, 'Error al listar productos');
         }
     }
 
@@ -77,21 +48,16 @@ class ProductoController {
 
             res.json(producto);
         } catch (error) {
-            res.status(500).json({ mensaje: 'Error al buscar producto', error: error.message });
+            this._responderError(res, error, 'Error al buscar producto');
         }
     }
 
     async crear(req, res) {
-        const validacion = this._validarDatosProducto(req.body);
-        if (validacion.error) {
-            return res.status(400).json({ mensaje: validacion.error });
-        }
-
         try {
-            await this.servicio.crear(validacion.datos);
-            res.json({ mensaje: 'Producto creado' });
+            await this.servicio.crear(req.body);
+            res.status(201).json({ mensaje: 'Producto creado' });
         } catch (error) {
-            res.status(500).json({ mensaje: 'Error al crear producto', error: error.message });
+            this._responderError(res, error, 'Error al crear producto');
         }
     }
 
@@ -101,16 +67,11 @@ class ProductoController {
             return res.status(400).json({ mensaje: 'ID inválido' });
         }
 
-        const validacion = this._validarDatosProducto(req.body);
-        if (validacion.error) {
-            return res.status(400).json({ mensaje: validacion.error });
-        }
-
         try {
-            await this.servicio.actualizar(id, validacion.datos);
+            await this.servicio.actualizar(id, req.body);
             res.json({ mensaje: 'Producto actualizado' });
         } catch (error) {
-            res.status(500).json({ mensaje: 'Error al actualizar producto', error: error.message });
+            this._responderError(res, error, 'Error al actualizar producto');
         }
     }
 
@@ -124,7 +85,7 @@ class ProductoController {
             await this.servicio.eliminar(id);
             res.json({ mensaje: 'Producto eliminado' });
         } catch (error) {
-            res.status(500).json({ mensaje: 'Error al eliminar producto', error: error.message });
+            this._responderError(res, error, 'Error al eliminar producto');
         }
     }
 }

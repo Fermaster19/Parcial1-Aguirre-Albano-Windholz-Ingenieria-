@@ -1,4 +1,5 @@
 const ProductoModel = require('../models/ProductoModel');
+const ValidationError = require('../errors/ValidationError');
 const { PrecioContexto } = require('../patterns/strategy/PrecioStrategy');
 const { decorarProducto } = require('../patterns/decorator/ProductoDecorator');
 
@@ -9,6 +10,45 @@ class ProductoService {
     constructor(modelo = new ProductoModel()) {
         this.modelo = modelo;
         this.precioContexto = new PrecioContexto();
+    }
+
+    /**
+     * Valida y normaliza datos de entrada para crear/actualizar productos.
+     * @throws {ValidationError}
+     */
+    validarDatos(datos) {
+        const { nombre, precio, stock, marca } = datos ?? {};
+
+        if (nombre === undefined || nombre === null || String(nombre).trim() === '') {
+            throw new ValidationError('El nombre es obligatorio');
+        }
+
+        if (marca === undefined || marca === null || String(marca).trim() === '') {
+            throw new ValidationError('La marca es obligatoria');
+        }
+
+        const precioNum = Number(precio);
+        if (precio === undefined || precio === null || Number.isNaN(precioNum) || precioNum < 0) {
+            throw new ValidationError('El precio debe ser un número mayor o igual a 0');
+        }
+
+        const stockNum = Number(stock);
+        if (
+            stock === undefined ||
+            stock === null ||
+            Number.isNaN(stockNum) ||
+            !Number.isInteger(stockNum) ||
+            stockNum < 0
+        ) {
+            throw new ValidationError('El stock debe ser un entero mayor o igual a 0');
+        }
+
+        return {
+            nombre: String(nombre).trim(),
+            marca: String(marca).trim(),
+            precio: precioNum,
+            stock: stockNum
+        };
     }
 
     enriquecerProducto(producto, tipoEstrategia = 'lista') {
@@ -39,11 +79,13 @@ class ProductoService {
     }
 
     async crear(datos) {
-        return this.modelo.crear(datos);
+        const datosValidos = this.validarDatos(datos);
+        return this.modelo.crear(datosValidos);
     }
 
     async actualizar(id, datos) {
-        return this.modelo.actualizar(id, datos);
+        const datosValidos = this.validarDatos(datos);
+        return this.modelo.actualizar(id, datosValidos);
     }
 
     async eliminar(id) {
