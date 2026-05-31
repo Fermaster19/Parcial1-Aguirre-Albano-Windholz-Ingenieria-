@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventario - MVP</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>Gestión de Inventario</h1>
+    <p class="subtitulo">Arquitectura MVC + Singleton, Decorator y Strategy</p>
+
+    <section class="formulario">
+        <h2>Agregar producto</h2>
+        <input type="text" id="nombre" placeholder="Nombre">
+        <input type="number" id="precio" placeholder="Precio" min="0" step="0.01">
+        <input type="number" id="stock" placeholder="Stock" min="0">
+        <input type="text" id="marca" placeholder="Marca">
+        <button id="btnAgregar">Agregar</button>
+    </section>
+
+    <section class="estrategia">
+        <h2>Estrategia de precio (Strategy)</h2>
+        <select id="estrategia">
+            <option value="lista">Precio de lista</option>
+            <option value="mayorista">Mayorista (-15%)</option>
+            <option value="promocion">Promoción (-25% si stock ≥ 10)</option>
+        </select>
+        <button id="btnRecargar">Actualizar lista</button>
+    </section>
+
+    <section>
+        <h2>Productos</h2>
+        <ul id="lista"></ul>
+    </section>
+
+    <section class="busqueda">
+        <h2>Buscar por ID</h2>
+        <input type="number" id="buscarId" placeholder="ID del producto" min="1">
+        <button id="btnBuscar">Buscar</button>
+        <ul id="resultadoBusqueda"></ul>
+    </section>
+
+    <script src="js/models/ProductoApiModel.js"></script>
+    <script src="js/views/ProductoView.js"></script>
+    <script src="js/controllers/ProductoUIController.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
