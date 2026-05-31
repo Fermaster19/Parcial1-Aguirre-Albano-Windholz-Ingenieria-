@@ -55,4 +55,9 @@ button:hover {
 
 .mensaje-error {
     color: #c0392b;
+    font-weight: bold;
+}
+
+.mensaje-ok {
+    color: #27ae60;
 }

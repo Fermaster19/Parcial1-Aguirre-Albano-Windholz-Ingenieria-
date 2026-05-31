@@ -29,27 +29,50 @@ class ProductoUIController {
         this.cargarLista();
     }
 
+    _mensajeError(error, fallback) {
+        return error?.message || fallback;
+    }
+
     async cargarLista() {
         try {
             const estrategia = this.vista.obtenerEstrategia();
             const productos = await this.modelo.obtenerTodos(estrategia);
             this.productosCache = productos;
             this.vista.renderizarLista(productos);
-        } catch {
-            this.vista.mostrarMensajeLista('Error de conexión con el servidor', true);
+        } catch (error) {
+            this.vista.mostrarMensajeLista(
+                this._mensajeError(error, 'Error de conexión con el servidor'),
+                true
+            );
         }
     }
 
     async crear() {
         const datos = this.vista.obtenerDatosFormulario();
-        await this.modelo.crear(datos);
-        this.vista.limpiarFormulario();
-        await this.cargarLista();
+        this.vista.limpiarMensajeFormulario();
+
+        try {
+            await this.modelo.crear(datos);
+            this.vista.limpiarFormulario();
+            await this.cargarLista();
+        } catch (error) {
+            this.vista.mostrarMensajeFormulario(
+                this._mensajeError(error, 'No se pudo crear el producto'),
+                true
+            );
+        }
     }
 
     async eliminar(id) {
-        await this.modelo.eliminar(id);
-        await this.cargarLista();
+        try {
+            await this.modelo.eliminar(id);
+            await this.cargarLista();
+        } catch (error) {
+            this.vista.mostrarMensajeLista(
+                this._mensajeError(error, 'No se pudo eliminar el producto'),
+                true
+            );
+        }
     }
 
     async editar(id) {
@@ -59,8 +82,15 @@ class ProductoUIController {
         const datos = this.vista.pedirEdicion(producto);
         if (!datos) return;
 
-        await this.modelo.actualizar(id, datos);
-        await this.cargarLista();
+        try {
+            await this.modelo.actualizar(id, datos);
+            await this.cargarLista();
+        } catch (error) {
+            this.vista.mostrarMensajeLista(
+                this._mensajeError(error, 'No se pudo actualizar el producto'),
+                true
+            );
+        }
     }
 
     async buscarPorId() {

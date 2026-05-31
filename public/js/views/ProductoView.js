@@ -5,6 +5,7 @@ class ProductoView {
     constructor() {
         this.lista = document.getElementById('lista');
         this.resultadoBusqueda = document.getElementById('resultadoBusqueda');
+        this.mensajeFormulario = document.getElementById('mensajeFormulario');
     }
 
     limpiarLista() {
@@ -60,6 +61,16 @@ class ProductoView {
         document.getElementById('precio').value = '';
         document.getElementById('stock').value = '';
         document.getElementById('marca').value = '';
+    }
+
+    mostrarMensajeFormulario(mensaje, esError = false) {
+        this.mensajeFormulario.textContent = mensaje;
+        this.mensajeFormulario.className = esError ? 'mensaje-error' : 'mensaje-ok';
+    }
+
+    limpiarMensajeFormulario() {
+        this.mensajeFormulario.textContent = '';
+        this.mensajeFormulario.className = '';
     }
 
     obtenerEstrategia() {

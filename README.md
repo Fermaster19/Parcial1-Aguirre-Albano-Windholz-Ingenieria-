@@ -6,7 +6,7 @@
 |------------|------------------|
 | Aguirre Claudio | Backend MVC, patrones, API REST, estructura `src/` y `public/` |
 | Albano Julieta | Tests con Jest, validaciones, integraci├│n y rama de referencia m├ís actualizada |
-| Windholz Cristhian | Documentación (`README.md`, `docs/DEFENSA-ORAL.md`): diagrama, patrones 3.3/3.4, install/run/test, Git, defensa oral |
+| Windholz Cristhian | Documentación (`README.md`): diagrama, patrones 3.3/3.4, install/run/test, Git, defensa oral |
 
 Aplicaci├│n CRUD de inventario de productos que cumple **arquitectura MVC** y tres **patrones de dise├▒o**: Singleton, Decorator y Strategy.
 
@@ -25,7 +25,6 @@ Aplicaci├│n CRUD de inventario de productos que cumple **arquitectura MVC** 
 5. [Git y trabajo en equipo](#5-git-y-trabajo-en-equipo)
 6. [Criterio de ÔÇ£listoÔÇØ](#6-criterio-de-listo)
 7. [Defensa oral (guía defendible)](#7-defensa-oral-guía-defendible)
-- [Apéndice: preguntas incómodas (oral)](docs/DEFENSA-ORAL.md)
 8. [API REST y base de datos](#8-api-rest-y-base-de-datos)
 
 ---
@@ -103,7 +102,7 @@ npm test
 
 | Verificaci├│n | Esperado |
 |--------------|----------|
-| Salida | `Test Suites: 5 passed` |
+| Salida | `Test Suites: 6 passed` |
 | MySQL | **No** debe estar levantado para estos tests unitarios |
 
 Detalle de cada suite ÔåÆ [┬º4 Ejecutar tests](#4-ejecutar-tests-npm-test).
@@ -135,6 +134,8 @@ npm test             # Jest, sin MySQL (rama Albano)
 | **Rutas** | Enrutamiento Express | `routes/productoRoutes.js` |
 
 **Datos vs l├│gica:** `Producto` solo guarda campos y `toJSON()`. `ProductoModel` solo ejecuta SQL v├¡a `DatabaseSingleton`. `ProductoService` concentra validaciones, Strategy (precio) y Decorator (descripci├│n).
+
+**Modelo en MVC estricto:** las tres capas visibles son Vista, Controlador y Modelo. En el backend, el Modelo de dominio incluye `Producto` + `ProductoModel` (persistencia) + `ProductoService` (reglas de negocio); el Controller solo delega HTTP.
 
 ### Frontend (`public/js/`)
 
@@ -314,7 +315,7 @@ switch (tipo) {
 
 ### Responsable
 
-**Albano Julieta** ÔÇö implementaci├│n Jest en `rama-AlbanoJulieta` (5 suites: Strategy ├ù3, Decorator, Service).
+**Albano Julieta** — implementación Jest (6 suites: Strategy ×3, Decorator, Service, ProductoModel con mock).
 
 ### Comandos
 
@@ -344,9 +345,10 @@ En `package.json`:
 | `__tests__/PrecioPromocionStrategy.test.js` | Strategy | ÔêÆ25 % solo si `stock >= 10` |
 | `__tests__/ProductoDecorator.test.js` | Decorator | `STOCK BAJO` y `MARCA PREMIUM` |
 | `__tests__/ProductoService.test.js` | Service | `validarDatos`, `ValidationError` |
+| `__tests__/ProductoModel.test.js` | Model (persistencia) | Mapeo filas SQL → `Producto`, mock de `DatabaseSingleton` |
 
-- **No** abrir XAMPP para `npm test`: son pruebas **unitarias** de l├│gica pura.
-- Si en el futuro se testea `ProductoModel` con BD real, **mockear** `DatabaseSingleton` (no ejecutar SQL en Jest).
+- **No** abrir XAMPP para `npm test`: son pruebas **unitarias** de lógica pura.
+- `ProductoModel` se testea con **mock** de `DatabaseSingleton` (no ejecutar SQL en Jest).
 
 ### Salida esperada (cuando Albano termin├│)
 
@@ -356,8 +358,9 @@ En `package.json`:
  PASS  __tests__/PrecioPromocionStrategy.test.js
  PASS  __tests__/ProductoDecorator.test.js
  PASS  __tests__/ProductoService.test.js
+ PASS  __tests__/ProductoModel.test.js
 
-Test Suites: 5 passed, 5 total
+Test Suites: 6 passed, 6 total
 ```
 
 ### Si `npm test` falla
@@ -436,7 +439,7 @@ git merge rama-WindholzCristhian -m "docs: README diagrama, patrones, install/ru
 
 # 5. Verificar proyecto unificado
 npm install
-npm test    # 5 suites (Julieta)
+npm test    # 6 suites
 npm start   # CRUD + MySQL (XAMPP)
 
 # 6. Subir rama integrada
@@ -469,22 +472,22 @@ Marcar cuando est├® verificado en la **rama unificada** (base `rama-AlbanoJul
 - [x] **Sección Git / equipo** (§5): ramas, roles, tabla integrante ↔ commits (50/50), cómo mergear README
 - [x] **Gu├¡a install + run + test** (secci├│n r├ípida al inicio)
 - [x] **Secci├│n ejecutar tests** (┬º4) ÔÇö referencia rama Albano
-- [x] **Guía defensa oral defendible** (§7 + [docs/DEFENSA-ORAL.md](docs/DEFENSA-ORAL.md))
-- [ ] README fusionado sin conflictos en rama final del grupo
+- [x] **Guía defensa oral defendible** (§7)
+- [x] README fusionado sin conflictos en rama final del grupo
 
-### C├│digo y funcionalidad (rama Albano / integrada)
+### Código y funcionalidad (rama integrada)
 
-- [ ] MVC backend y frontend operativos
-- [ ] CRUD persiste en `tienda.productos`
-- [ ] Singleton, Decorator y Strategy en ejecuci├│n (`npm start`)
-- [ ] `npm test` ÔÇö **5 suites en verde** (pendiente hasta merge con rama Albano)
-- [ ] Validaciones (`ValidationError` ÔåÆ HTTP 400)
+- [x] MVC backend y frontend operativos
+- [x] CRUD persiste en `tienda.productos`
+- [x] Singleton, Decorator y Strategy en ejecución (`npm start`)
+- [x] `npm test` — **6 suites en verde**
+- [x] Validaciones (`ValidationError` → HTTP 400)
 
 ### Entrega final equipo
 
-- [ ] Merge de las tres ramas completado
-- [ ] Un solo README coherente con el c├│digo del repo
-- [ ] Demo oral ensayada con diagrama ┬º2 y patrones ┬º3
+- [x] Merge de las tres ramas completado
+- [x] Un solo README coherente con el código del repo
+- [ ] Demo oral ensayada con diagrama §2 y patrones §3
 
 ---
 
@@ -494,13 +497,7 @@ Objetivo: poder explicar en **2–3 minutos** el flujo, los **tres patrones con 
 
 **Material de apoyo:** diagrama §2, tablas §3.3 y §3.4, [guía install/run/test](#guía-rápida-install--run--test).
 
-### Apéndice — Preguntas incómodas (doc interno)
-
-Guion extendido, respuestas a preguntas difíciles del profesor y checklist antes del oral:
-
-**[docs/DEFENSA-ORAL.md](docs/DEFENSA-ORAL.md)** — uso interno del equipo; complementa esta sección (MVC falso, Singleton “global”, merge de ramas, producción, demo fallida, etc.).
-
-Usar este guion; apoyarse en el diagrama del ┬º2.
+Usar este guion; apoyarse en el diagrama del §2.
 
 ### Apertura (20 s)
 
@@ -535,12 +532,12 @@ Usar este guion; apoyarse en el diagrama del ┬º2.
 
 ### Tests (20 s)
 
-*ÔÇ£Albano implement├│ Jest: `npm test` corre cinco suites sin MySQL ÔÇö Strategy, Decorator y validaciones del servicio. Install, run y test est├ín en la gu├¡a r├ípida del README.ÔÇØ*
+*“Albano implementó Jest: `npm test` corre seis suites sin MySQL — Strategy, Decorator, validaciones del servicio y ProductoModel mockeado. Install, run y test están en la guía rápida del README.”*
 
 ### Demo en vivo (si el profe lo pide)
 
 1. `npm start` ÔåÆ **http://localhost:3000** (CRUD + estrategia en UI).
-2. `npm test` ÔåÆ mostrar **5 passed** (rama con `__tests__/`, t├¡picamente `rama-AlbanoJulieta`).
+2. `npm test` → mostrar **6 passed** (rama integrada con `__tests__/`).
 
 ### Cierre (10 s)
 
@@ -583,7 +580,7 @@ Parcial-1/
 Ôöé   Ôö£ÔöÇÔöÇ routes/productoRoutes.js
 Ôöé   ÔööÔöÇÔöÇ patterns/decorator/, strategy/
 Ôö£ÔöÇÔöÇ public/          # frontend MVC
-ÔööÔöÇÔöÇ __tests__/       # Jest (rama Albano)
+ÔööÔöÇÔöÇ __tests__/       # Jest (6 suites)
 ```
 
 ### API REST
