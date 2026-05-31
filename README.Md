@@ -106,7 +106,7 @@ Parcial-1/
 ## Requisitos
 
 - [Node.js](https://nodejs.org/)
-- [XAMPP](https://www.apachefriends.org/) (MySQL)
+- [XAMPP](https://www.apachefriends.org/) (MySQL) — solo necesario para ejecutar la app completa con persistencia
 
 ## Instalación
 
@@ -141,6 +141,17 @@ npm start
 Abrir en el navegador: **http://localhost:3000**
 
 El servidor sirve el frontend y la API en el mismo puerto.
+
+## Pruebas
+
+Ejecutar las pruebas unitarias con:
+
+```bash
+npm test
+```
+
+- Los tests son unitarios y no requieren que XAMPP o MySQL estén ejecutándose.
+- Si se testea `src/models/ProductoModel.js`, debe mockearse `src/config/DatabaseSingleton.js` para evitar ejecutar SQL directo en las pruebas.
 
 ## API REST
 
