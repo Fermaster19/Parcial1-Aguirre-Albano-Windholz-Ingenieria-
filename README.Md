@@ -6,7 +6,7 @@
 |------------|------------------|
 | Aguirre Claudio | Backend MVC, patrones, API REST, estructura `src/` y `public/` |
 | Albano Julieta | Tests con Jest, validaciones, integración y rama de referencia más actualizada |
-| Windholz Cristhian | Documentación (`README.Md`): diagrama, patrones 3.3/3.4, criterio de listo, Git y guía oral |
+| Windholz Cristhian | Documentación (`README.Md`): diagrama, patrones 3.3/3.4, guía install/run/test, tests (§4), Git (§5), defensa oral (§7) |
 
 Aplicación CRUD de inventario de productos que cumple **arquitectura MVC** y tres **patrones de diseño**: Singleton, Decorator y Strategy.
 
@@ -17,17 +17,103 @@ Aplicación CRUD de inventario de productos que cumple **arquitectura MVC** y tr
 
 ## Índice
 
+- [**Guía rápida: install + run + test**](#guía-rápida-install--run--test) ← empezar aquí
 1. [Stack y arquitectura MVC](#1-stack-y-arquitectura-mvc)
 2. [Diagrama de flujo (ítem consigna)](#2-diagrama-de-flujo-ítem-consigna)
-3. [Patrones de diseño](#3-patrones-de-diseño)
-   - [3.1 Singleton](#31-singleton)
-   - [3.3 Decorator](#33-decorator)
-   - [3.4 Strategy](#34-strategy)
-4. [Ejecutar tests (`npm test`)](#4-ejecutar-tests-npm-test)
+3. [Patrones de diseño](#3-patrones-de-diseño) (3.1, 3.3, 3.4 — defendible en oral)
+4. [Ejecutar tests (`npm test`)](#4-ejecutar-tests-npm-test) — cuando Albano termine / tras merge
 5. [Git y trabajo en equipo](#5-git-y-trabajo-en-equipo)
 6. [Criterio de “listo”](#6-criterio-de-listo)
-7. [Guía para defensa oral](#7-guía-para-defensa-oral)
-8. [Instalación, BD, ejecución y API](#8-instalación-bd-ejecución-y-api)
+7. [Defensa oral (guía defendible)](#7-defensa-oral-guía-defendible)
+8. [API REST y base de datos](#8-api-rest-y-base-de-datos)
+
+---
+
+## Guía rápida: install + run + test
+
+Pasos en orden para **correr el proyecto completo** y **validar tests**. Usar la rama con código (`rama-AlbanoJulieta`) o la rama ya fusionada del equipo.
+
+### Requisitos previos
+
+| Herramienta | Para qué |
+|-------------|----------|
+| [Node.js](https://nodejs.org/) (LTS) | `npm install`, `npm start`, `npm test` |
+| [XAMPP](https://www.apachefriends.org/) | MySQL en `localhost` — solo para **run** (app con BD), no para **test** |
+
+### Paso 1 — Clonar / actualizar y elegir rama
+
+```bash
+git clone <url-del-repo>
+cd Parcial_Windholz_Ingenieria
+git fetch origin
+git checkout rama-AlbanoJulieta    # código + tests (referencia del grupo)
+# o, tras el merge final:
+# git checkout rama-AlbanoJulieta && git merge rama-WindholzCristhian
+```
+
+### Paso 2 — Instalar dependencias
+
+```bash
+npm install
+```
+
+Instala Express, mysql2, cors y (en rama Albano) **Jest** como devDependency.
+
+### Paso 3 — Base de datos (solo para `npm start`)
+
+1. Iniciar **MySQL** desde el panel de XAMPP.
+2. En phpMyAdmin ejecutar:
+
+```sql
+CREATE DATABASE IF NOT EXISTS tienda;
+USE tienda;
+CREATE TABLE IF NOT EXISTS productos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL,
+  precio DECIMAL(10,2) NOT NULL,
+  stock INT NOT NULL DEFAULT 0,
+  marca VARCHAR(100) NOT NULL
+);
+```
+
+3. Revisar credenciales en `src/config/DatabaseSingleton.js` (`host`, `user`, `password`, `database: 'tienda'`).
+
+### Paso 4 — Ejecutar la aplicación (`npm start`)
+
+```bash
+npm start
+```
+
+| Verificación | Esperado |
+|--------------|----------|
+| Consola | `Servidor corriendo en puerto 3000` y `MySQL conectado` |
+| Navegador | Abrir **http://localhost:3000** — listado CRUD de productos |
+| API | `GET http://localhost:3000/productos?estrategia=lista` devuelve JSON |
+
+**Si falla:** MySQL apagado → error de conexión; puerto 3000 ocupado → cerrar otro proceso Node.
+
+### Paso 5 — Ejecutar tests (`npm test`)
+
+> Aplica cuando la rama incluye la carpeta `__tests__/` (entrega de **Albano Julieta** en `rama-AlbanoJulieta`). No hace falta XAMPP.
+
+```bash
+npm test
+```
+
+| Verificación | Esperado |
+|--------------|----------|
+| Salida | `Test Suites: 5 passed` |
+| MySQL | **No** debe estar levantado para estos tests unitarios |
+
+Detalle de cada suite → [§4 Ejecutar tests](#4-ejecutar-tests-npm-test).
+
+### Resumen de comandos
+
+```bash
+npm install          # una vez por máquina / tras pull
+npm start            # app + MySQL (XAMPP)
+npm test             # Jest, sin MySQL (rama Albano)
+```
 
 ---
 
@@ -217,95 +303,135 @@ switch (tipo) {
 
 ## 4. Ejecutar tests (`npm test`)
 
-> **Estado:** los tests están implementados en **`rama-AlbanoJulieta`** (Julieta). En **`rama-WindholzCristhian`** solo está la documentación hasta que el equipo unifique ramas. Tras el merge, esta sección aplica al repo unificado.
+### Cuándo usar esta sección
 
-### Requisitos
+| Momento | Qué hacer |
+|---------|-----------|
+| **Ahora (entrega individual Windholz)** | Solo documentación; los tests viven en `rama-AlbanoJulieta`. |
+| **Cuando Albano termine** | Confirmar en su rama: `__tests__/`, script `"test": "jest --runInBand"` en `package.json`, `npm test` en verde. |
+| **Tras merge del equipo** | En la rama unificada, cualquier integrante ejecuta `npm test` según la [guía rápida § Paso 5](#paso-5--ejecutar-tests-npm-test). |
 
-- Node.js instalado.
-- En la carpeta del proyecto (con `package.json` que define el script `test`):
+### Responsable
+
+**Albano Julieta** — implementación Jest en `rama-AlbanoJulieta` (5 suites: Strategy ×3, Decorator, Service).
+
+### Comandos
 
 ```bash
+git checkout rama-AlbanoJulieta
 npm install
 npm test
 ```
 
-El script ejecuta: `jest --runInBand` (tests en serie, más estable con mocks).
+En `package.json`:
+
+```json
+"scripts": {
+  "start": "node server.js",
+  "test": "jest --runInBand"
+}
+```
+
+`jest --runInBand` ejecuta los tests **en serie** (más estable si hay mocks compartidos).
 
 ### Qué se prueba (sin MySQL)
 
-| Archivo de test | Qué valida |
-|-----------------|------------|
-| `PrecioListaStrategy.test.js` | Precio sin modificar |
-| `PrecioMayoristaStrategy.test.js` | Descuento 15 % |
-| `PrecioPromocionStrategy.test.js` | 25 % solo con `stock >= 10` |
-| `ProductoDecorator.test.js` | Etiquetas stock bajo / marca premium |
-| `ProductoService.test.js` | `validarDatos`, errores `ValidationError` |
+| Archivo | Patrón / capa | Qué valida |
+|---------|---------------|------------|
+| `__tests__/PrecioListaStrategy.test.js` | Strategy | Precio sin modificar |
+| `__tests__/PrecioMayoristaStrategy.test.js` | Strategy | −15 % (`× 0,85`) |
+| `__tests__/PrecioPromocionStrategy.test.js` | Strategy | −25 % solo si `stock >= 10` |
+| `__tests__/ProductoDecorator.test.js` | Decorator | `STOCK BAJO` y `MARCA PREMIUM` |
+| `__tests__/ProductoService.test.js` | Service | `validarDatos`, `ValidationError` |
 
-- **No hace falta** XAMPP/MySQL corriendo: son pruebas **unitarias**.
-- Si se testea `ProductoModel` contra la BD real, hay que **mockear** `DatabaseSingleton` para no ejecutar SQL en Jest.
+- **No** abrir XAMPP para `npm test`: son pruebas **unitarias** de lógica pura.
+- Si en el futuro se testea `ProductoModel` con BD real, **mockear** `DatabaseSingleton` (no ejecutar SQL en Jest).
 
-### Salida esperada
+### Salida esperada (cuando Albano terminó)
 
 ```
-PASS __tests__/...
-Test Suites: 5 passed
+ PASS  __tests__/PrecioListaStrategy.test.js
+ PASS  __tests__/PrecioMayoristaStrategy.test.js
+ PASS  __tests__/PrecioPromocionStrategy.test.js
+ PASS  __tests__/ProductoDecorator.test.js
+ PASS  __tests__/ProductoService.test.js
+
+Test Suites: 5 passed, 5 total
 ```
 
-Si falla: revisar que estés en la rama con carpeta `__tests__/` y `jest` en `devDependencies`.
+### Si `npm test` falla
+
+1. ¿Estás en una rama con carpeta `__tests__/`? (`git branch --show-current`)
+2. ¿Corriste `npm install` después del merge?
+3. ¿Existe `jest` en `devDependencies`?
+4. No mezclar tests con MySQL apagado solo si algún test importa el modelo sin mock — en la rama Albano no debería ocurrir.
 
 ---
 
 ## 5. Git y trabajo en equipo
 
-### Ramas del repositorio
+### Modelo de ramas (entrega individual → unificación)
 
-| Rama | Responsable | Contenido principal |
-|------|-------------|---------------------|
-| `rama-AguirreClaudio` | Claudio | Proyecto MVC completo (backend, frontend, patrones, `server.js`) |
-| `rama-AlbanoJulieta` | Julieta | Misma base + **tests Jest**, validaciones, `.gitignore`; **referencia más actualizada** |
-| `rama-WindholzCristhian` | Cristhian | **Este README** (diagrama, 3.3, 3.4, listo, oral, Git) |
+El profesor pidió trabajo **por integrante en su rama**; al final el equipo **unifica** en una rama con código + README.
 
-### Flujo de trabajo acordado
-
-1. Cada integrante trabaja en **su rama** (entrega individual).
-2. La integración se hace al final sobre la rama más completa (`rama-AlbanoJulieta` recomendada como base).
-3. El README de `rama-WindholzCristhian` se fusiona para cumplir ítems de documentación de la consigna.
-
-### Cómo mergear el README actualizado
-
-**Opción A — Integrar documentación sobre la rama de Julieta (recomendada)**
-
-```bash
-git checkout rama-AlbanoJulieta
-git pull origin rama-AlbanoJulieta
-git merge rama-WindholzCristhian -m "docs: integrar README (diagrama, patrones 3.3/3.4, tests, oral)"
+```
+origin
+├── rama-AguirreClaudio    ← Claudio
+├── rama-AlbanoJulieta     ← Julieta (código + tests, más actualizada)
+└── rama-WindholzCristhian ← Cristhian (este README)
 ```
 
-Si Git marca conflicto solo en `README.Md`, conservar las secciones de este archivo (diagrama Mermaid, 3.3, 3.4, criterio de listo, Git, oral) y combinar con cualquier detalle único que hubiera en la rama base.
+### Quién hizo qué
 
-**Opción B — Traer código de Albano a la rama de Cristhian (solo si el profe pide entregar todo en tu rama)**
+| Integrante | Rama | Entregable principal | Archivos clave |
+|------------|------|----------------------|----------------|
+| **Aguirre Claudio** | `rama-AguirreClaudio` | Backend/frontend MVC, API REST, patrones Singleton / Decorator / Strategy, `server.js`, estructura `src/` y `public/` | `src/controllers/`, `src/services/`, `src/patterns/`, `public/js/` |
+| **Albano Julieta** | `rama-AlbanoJulieta` | Todo lo anterior + **tests Jest**, `ValidationError`, `.gitignore`, ajustes finales; **rama de referencia para ejecutar** `npm start` y `npm test` | `__tests__/`, `package.json` (script `test`) |
+| **Windholz Cristhian** | `rama-WindholzCristhian` | **Documentación:** diagrama Mermaid, patrones 3.3/3.4 (problema + alternativa), Git, [guía install/run/test](#guía-rápida-install--run--test), [defensa oral §7](#7-defensa-oral-guía-defendible) | `README.Md` |
+
+### Flujo acordado
+
+1. Cada uno hace **commit/push en su rama** (sin tocar la de los demás hasta el merge).
+2. Julieta confirma **`npm test` en verde** en `rama-AlbanoJulieta` (cuando termine tests).
+3. Cristhian mantiene **README actualizado** en `rama-WindholzCristhian`.
+4. El equipo mergea README + código en **`rama-AlbanoJulieta`** (recomendado) o rama `main` si el profe la define.
+
+### Cómo mergear el README actualizado (paso a paso)
+
+**Recomendado:** base = rama de Julieta + traer solo documentación de Cristhian.
+
+```bash
+# 1. Actualizar remoto
+git fetch origin
+
+# 2. Base con código y tests
+git checkout rama-AlbanoJulieta
+git pull origin rama-AlbanoJulieta
+
+# 3. Integrar README de Cristhian
+git merge rama-WindholzCristhian -m "docs: README diagrama, patrones, install/run/test, oral"
+
+# 4. Si hay conflicto en README.Md:
+#    - Conservar diagrama Mermaid, §3.3, §3.4, guía rápida, §4 tests, §5 Git, §7 oral
+#    - Conservar de la rama base cualquier detalle de API/BD que no esté duplicado
+
+# 5. Verificar proyecto unificado
+npm install
+npm test    # 5 suites (Julieta)
+npm start   # CRUD + MySQL (XAMPP)
+
+# 6. Subir rama integrada
+git push origin rama-AlbanoJulieta
+```
+
+**Alternativa** (entregar todo en rama Windholz): mergear `rama-AlbanoJulieta` → `rama-WindholzCristhian` y resolver conflictos dejando este `README.Md` completo.
+
+### Commits en rama individual (Cristhian)
 
 ```bash
 git checkout rama-WindholzCristhian
-git merge rama-AlbanoJulieta -m "merge: código y tests de referencia"
-# Resolver conflictos; mantener README.Md completo
-git push origin rama-WindholzCristhian
-```
-
-**Después del merge**
-
-```bash
-npm install
-npm start          # probar CRUD en http://localhost:3000
-npm test           # verificar tests de Julieta
-```
-
-### Commits sugeridos (individual)
-
-```bash
-# En rama-WindholzCristhian
 git add README.Md
-git commit -m "docs: diagrama, patrones 3.3/3.4, criterio listo, tests y guía oral"
+git commit -m "docs: install/run/test, tests Albano, Git, defensa oral"
 git push origin rama-WindholzCristhian
 ```
 
@@ -322,7 +448,9 @@ Marcar cuando esté verificado en la **rama unificada** (base `rama-AlbanoJuliet
 - [x] **Patrón 3.4 Strategy:** problema real + alternativas descartadas + decisión
 - [x] **Singleton 3.1** documentado con trade-off pool vs conexión única
 - [x] **Sección Git / equipo** (§5): ramas, roles, cómo mergear README
-- [x] **Guía defensa oral** (§7)
+- [x] **Guía install + run + test** (sección rápida al inicio)
+- [x] **Sección ejecutar tests** (§4) — referencia rama Albano
+- [x] **Guía defensa oral defendible** (§7)
 - [ ] README fusionado sin conflictos en rama final del grupo
 
 ### Código y funcionalidad (rama Albano / integrada)
@@ -341,9 +469,13 @@ Marcar cuando esté verificado en la **rama unificada** (base `rama-AlbanoJuliet
 
 ---
 
-## 7. Guía para defensa oral
+## 7. Defensa oral (guía defendible)
 
-Usar este guion de **2–3 minutos**; apoyarse en el diagrama del §2.
+Objetivo: poder explicar en **2–3 minutos** el flujo, los **tres patrones con problema y alternativa descartada**, y cómo se probó el proyecto — sin leer el README palabra por palabra.
+
+**Material de apoyo:** diagrama §2, tablas §3.3 y §3.4, [guía install/run/test](#guía-rápida-install--run--test).
+
+Usar este guion; apoyarse en el diagrama del §2.
 
 ### Apertura (20 s)
 
@@ -378,11 +510,16 @@ Usar este guion de **2–3 minutos**; apoyarse en el diagrama del §2.
 
 ### Tests (20 s)
 
-*“Julieta dejó tests unitarios con Jest; `npm test` no necesita MySQL porque prueban estrategias, decorator y validaciones del servicio.”*
+*“Albano implementó Jest: `npm test` corre cinco suites sin MySQL — Strategy, Decorator y validaciones del servicio. Install, run y test están en la guía rápida del README.”*
+
+### Demo en vivo (si el profe lo pide)
+
+1. `npm start` → **http://localhost:3000** (CRUD + estrategia en UI).
+2. `npm test` → mostrar **5 passed** (rama con `__tests__/`, típicamente `rama-AlbanoJulieta`).
 
 ### Cierre (10 s)
 
-*“Mi aporte en la rama Windholz fue documentar arquitectura, diagrama y justificación de patrones para la consigna; el código de referencia está en la rama Albano hasta el merge final.”*
+*“Mi aporte en la rama Windholz fue documentar arquitectura, diagrama, guía install/run/test, Git y defensa oral; el código y tests de referencia están en la rama Albano hasta el merge final.”*
 
 ### Preguntas frecuentes del profesor
 
@@ -393,10 +530,20 @@ Usar este guion de **2–3 minutos**; apoyarse en el diagrama del §2.
 | ¿Cómo cambio la estrategia? | Query `estrategia` o selector en UI → `PrecioContexto`. |
 | ¿Qué pasa si promoción y stock &lt; 10? | `PrecioPromocionStrategy` devuelve precio lista. |
 | ¿Controller tiene lógica de negocio? | No; solo HTTP y delega al servicio. |
+| ¿Cómo corro el proyecto? | Guía rápida: `npm install` → BD en XAMPP → `npm start` → `npm test`. |
+
+### Checklist “defendible en oral” (antes de presentar)
+
+- [ ] Recorrer el diagrama §2 de punta a punta (7 pasos).
+- [ ] Por cada patrón: **problema real** + **una alternativa descartada** + **decisión**.
+- [ ] Saber qué hizo cada compañero (tabla §5).
+- [ ] Poder ejecutar `npm start` y `npm test` en la rama integrada (o explicar que tests están en rama Albano hasta el merge).
 
 ---
 
-## 8. Instalación, BD, ejecución y API
+## 8. API REST y base de datos
+
+> **Install, run y test:** ver [Guía rápida](#guía-rápida-install--run--test) (pasos 2–5).
 
 ### Estructura del proyecto (rama integrada)
 
@@ -413,41 +560,6 @@ Parcial-1/
 ├── public/          # frontend MVC
 └── __tests__/       # Jest (rama Albano)
 ```
-
-### Requisitos
-
-- [Node.js](https://nodejs.org/)
-- [XAMPP](https://www.apachefriends.org/) (MySQL) — para ejecutar la app con persistencia
-
-### Instalación
-
-```bash
-npm install
-```
-
-### Base de datos
-
-```sql
-CREATE DATABASE IF NOT EXISTS tienda;
-USE tienda;
-CREATE TABLE IF NOT EXISTS productos (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  nombre VARCHAR(100) NOT NULL,
-  precio DECIMAL(10,2) NOT NULL,
-  stock INT NOT NULL DEFAULT 0,
-  marca VARCHAR(100) NOT NULL
-);
-```
-
-Credenciales en `src/config/DatabaseSingleton.js` (host, user, password, database).
-
-### Ejecución
-
-```bash
-npm start
-```
-
-Abrir **http://localhost:3000** (frontend y API en el mismo puerto).
 
 ### API REST
 
