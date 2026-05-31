@@ -1,44 +1,41 @@
 # Parcial - Gestión de Inventario (MVP)
 
- Integrantes: Aguirre Claudio 
-              Albano Julieta 
-              Windholz Cristhian 
+**Integrantes**
+
+| Integrante | Rol en el equipo |
+|------------|------------------|
+| Aguirre Claudio | Backend MVC, patrones, API REST, estructura `src/` y `public/` |
+| Albano Julieta | Tests con Jest, validaciones, integración y rama de referencia más actualizada |
+| Windholz Cristhian | Documentación (`README.Md`): diagrama, patrones 3.3/3.4, criterio de listo, Git y guía oral |
 
 Aplicación CRUD de inventario de productos que cumple **arquitectura MVC** y tres **patrones de diseño**: Singleton, Decorator y Strategy.
 
-> **Nota (entrega individual):** esta documentación describe la arquitectura de referencia en la rama `rama-AlbanoJulieta` (última actualización del grupo). Al unificar el repositorio, el README final debe coincidir con el código fusionado.
+> **Rama de referencia (código):** `rama-AlbanoJulieta` — contiene la implementación y los tests más recientes del grupo.  
+> **Rama de esta entrega (documentación):** `rama-WindholzCristhian` — incluye este README ampliado para la consigna y la defensa oral.
 
-## Stack
+---
 
-- Backend: Node.js + Express (MVC)
-- Base de datos: MySQL
-- Frontend: HTML + CSS + JavaScript vanilla (MVC)
+## Índice
 
-## Flujo de la aplicación (diagrama)
+1. [Stack y arquitectura MVC](#1-stack-y-arquitectura-mvc)
+2. [Diagrama de flujo (ítem consigna)](#2-diagrama-de-flujo-ítem-consigna)
+3. [Patrones de diseño](#3-patrones-de-diseño)
+   - [3.1 Singleton](#31-singleton)
+   - [3.3 Decorator](#33-decorator)
+   - [3.4 Strategy](#34-strategy)
+4. [Ejecutar tests (`npm test`)](#4-ejecutar-tests-npm-test)
+5. [Git y trabajo en equipo](#5-git-y-trabajo-en-equipo)
+6. [Criterio de “listo”](#6-criterio-de-listo)
+7. [Guía para defensa oral](#7-guía-para-defensa-oral)
+8. [Instalación, BD, ejecución y API](#8-instalación-bd-ejecución-y-api)
 
-El recorrido de una petición CRUD desde el cliente hasta la base de datos:
+---
 
-```mermaid
-flowchart LR
-    A["Navegador<br/>(public/js: ApiModel + UI Controller)"]
-    B["API REST<br/>(Express /productos)"]
-    C["ProductoController"]
-    D["ProductoService<br/>(Strategy + Decorator)"]
-    E["ProductoModel"]
-    F["DatabaseSingleton"]
-    G[("MySQL<br/>tienda.productos")]
+## 1. Stack y arquitectura MVC
 
-    A -->|"fetch (GET/POST/PUT/DELETE)"| B
-    B --> C
-    C --> D
-    D --> E
-    E --> F
-    F --> G
-```
-
-**Lectura del flujo:** el navegador no accede a MySQL directamente. Envía JSON a la API; el controlador solo traduce HTTP (status, parámetros, body); el servicio aplica reglas de negocio y patrones; el modelo ejecuta SQL; el Singleton centraliza la conexión hacia MySQL.
-
-## Arquitectura MVC
+- **Backend:** Node.js + Express (MVC en `src/`)
+- **Base de datos:** MySQL (XAMPP)
+- **Frontend:** HTML + CSS + JavaScript vanilla (MVC en `public/js/`)
 
 ### Backend (`src/`)
 
@@ -47,120 +44,388 @@ flowchart LR
 | **Entidad** | Objeto de dominio (datos del producto) | `models/Producto.js` |
 | **Modelo** | Solo persistencia CRUD (SQL) | `models/ProductoModel.js` |
 | **Servicio** | Lógica de negocio; usa Strategy y Decorator | `services/ProductoService.js` |
-| **Vista** | No aplica en API REST (la respuesta JSON es la salida) | — |
 | **Controlador** | Solo HTTP: validación de request, status y JSON | `controllers/ProductoController.js` |
 | **Rutas** | Enrutamiento Express | `routes/productoRoutes.js` |
 
-**Separación de responsabilidades — Datos vs Lógica:** `Producto` es la entidad de dominio: solo almacena los campos del producto (`id`, `nombre`, `precio`, `stock`, `marca`) y expone `toJSON()` para serializarse; no tiene acceso a la base de datos ni reglas de negocio. `ProductoModel` es exclusivamente la capa de persistencia: ejecuta las consultas SQL sobre MySQL a través de `DatabaseSingleton` y convierte las filas en instancias de `Producto`, sin conocer nada de precios ni descripciones. Toda la lógica de negocio —el cálculo de precio según Strategy y el armado de la descripción mediante Decorator— reside únicamente en `ProductoService`, que orquesta modelo y patrones antes de devolver los datos listos al controlador.
+**Datos vs lógica:** `Producto` solo guarda campos y `toJSON()`. `ProductoModel` solo ejecuta SQL vía `DatabaseSingleton`. `ProductoService` concentra validaciones, Strategy (precio) y Decorator (descripción).
 
 ### Frontend (`public/js/`)
 
-| Capa | Responsabilidad | Archivos |
-|------|-----------------|----------|
-| **Modelo** | Comunicación con la API | `models/ProductoApiModel.js` |
-| **Vista** | Renderizado del DOM | `views/ProductoView.js` |
-| **Controlador** | Eventos y coordinación | `controllers/ProductoUIController.js` |
+| Capa | Archivos |
+|------|----------|
+| Modelo (API) | `models/ProductoApiModel.js` |
+| Vista (DOM) | `views/ProductoView.js` |
+| Controlador UI | `controllers/ProductoUIController.js` |
 
-## Patrones de diseño
+---
 
-Cada patrón responde a un **problema concreto** del dominio. En todos los casos se evaluó una alternativa más simple y se descartó por mantenibilidad o acoplamiento.
+## 2. Diagrama de flujo (ítem consigna)
 
-### 1. Singleton (`src/config/DatabaseSingleton.js`)
+**Requisito de la consigna:** diagrama que muestre el recorrido **Navegador → API → Controller → Servicio/Modelo → Singleton → MySQL**.
 
-Garantiza **una única conexión** a MySQL en toda la aplicación.
+```mermaid
+flowchart LR
+    A["① Navegador<br/>fetch + MVC cliente"]
+    B["② API REST<br/>Express /productos"]
+    C["③ ProductoController"]
+    D["④ ProductoService"]
+    E["⑤ ProductoModel"]
+    F["⑥ DatabaseSingleton"]
+    G[("⑦ MySQL")]
+
+    A --> B --> C --> D --> E --> F --> G
+```
+
+**Qué demuestra cada paso (para corregir / oral):**
+
+| Paso | Componente | Qué hace | Qué NO hace |
+|------|------------|----------|-------------|
+| ① | Navegador | `fetch` JSON; UI en MVC cliente | No toca MySQL |
+| ② | API REST | Enruta verbos HTTP, CORS, JSON | No calcula precios ni SQL |
+| ③ | Controller | Parsea `id`, query `estrategia`, códigos HTTP | No conoce tablas ni descuentos |
+| ④ | Service | Validación, Strategy, Decorator | No escribe SQL directo |
+| ⑤ | Model | `SELECT` / `INSERT` / `UPDATE` / `DELETE` | No aplica reglas de precio |
+| ⑥ | Singleton | Una conexión MySQL compartida | No es capa de negocio |
+| ⑦ | MySQL | Persistencia `tienda.productos` | — |
+
+**Ejemplo concreto (GET listar):** el usuario elige estrategia `mayorista` en el frontend → `ProductoApiModel` llama `GET /productos?estrategia=mayorista` → `ProductoController.listar` → `ProductoService.listarConPresentacion` → `ProductoModel.obtenerTodos` → `DatabaseSingleton.consultar` → filas en MySQL → el servicio decora descripción y calcula `precioCalculado` → JSON al navegador.
+
+---
+
+## 3. Patrones de diseño
+
+En las subsecciones **3.3** y **3.4** se exige **problema real del dominio** + **alternativa descartada** + **por qué se eligió el patrón** (defendible en oral).
+
+### 3.1 Singleton
+
+**Archivo:** `src/config/DatabaseSingleton.js`
 
 ```js
 const db = DatabaseSingleton.obtenerInstancia();
 ```
 
-| | Detalle |
-|---|--------|
-| **Problema real** | Sin centralizar la conexión, cada capa (`ProductoModel`, futuros módulos, tests mal aislados) podría llamar a `mysql.createConnection()` por su cuenta. Eso duplica host/usuario/base, abre varias conexiones simultáneas innecesarias y, en XAMPP con límites bajos, puede agotar el pool del servidor o dejar conexiones colgadas si no se cierran bien. |
-| **Alternativa descartada** | **Nueva conexión por operación** (crear y cerrar en cada query): simple de escribir al principio, pero muy costosa en latencia y recursos. **Connection pool** (`mysql2.createPool()`): mejor para producción y alta concurrencia, pero añade configuración (tamaño del pool, timeouts) que no aporta al objetivo pedagógico del MVP. |
-| **Decisión** | Singleton con una conexión reutilizable: un solo punto de configuración, adecuado para tráfico bajo del parcial. Documentado el trade-off para migrar a pool si el proyecto escala. |
+| | |
+|---|---|
+| **Problema real** | El inventario se guarda en MySQL. Si `ProductoModel`, un futuro `UsuarioModel` y scripts de mantenimiento cada uno llaman `mysql.createConnection()`, se repiten credenciales, se abren muchas conexiones y en entornos como XAMPP (límite bajo de conexiones) aparecen errores `Too many connections` o conexiones que nadie cierra. |
+| **Alternativa descartada A** | **Conexión nueva por query:** fácil al inicio, pero cada operación paga handshake TCP + auth → lento e inestable bajo carga. |
+| **Alternativa descartada B** | **Pool (`createPool`):** correcto en producción, pero para el parcial agrega tamaño de pool, timeouts y manejo de cola sin aportar al aprendizaje del patrón Singleton pedido. |
+| **Decisión** | Una instancia única (`obtenerInstancia()`) con `consultar()` promisificado; todo el acceso SQL pasa por ahí. |
 
-**Trade-off: Conexión única vs Connection Pool**
+**Trade-off documentado:** conexión única = simple y suficiente en MVP; en producción migrar a pool por concurrencia.
 
-Este MVP implementa Singleton con una **conexión única**:
-- ✅ **Ventajas:** Simplicidad, bajo consumo de memoria, fácil de mantener
-- ❌ **Limitaciones:** No es escalable; con muchos requests concurrentes, todos usan la misma conexión (cuello de botella)
+---
 
-**Para producción**, es recomendable usar **Connection Pool** (`mysql2.createPool()`):
-- Múltiples conexiones reutilizables → mejor concurrencia
-- Si una conexión falla, otras siguen disponibles → mayor resiliencia
-- Costo: mayor consumo de memoria
+### 3.3 Decorator
 
-### 2. Decorator (`src/patterns/decorator/ProductoDecorator.js`)
+**Archivo:** `src/patterns/decorator/ProductoDecorator.js`  
+**Uso:** `ProductoService.enriquecerProducto()` → campo `descripcion` en la respuesta JSON.
 
-Añade dinámicamente etiquetas a la descripción del producto:
+**Comportamiento**
 
-- **Stock bajo** si `stock < 5`
-- **Marca premium** si la marca es Samsung, Apple, Sony o LG
+- Descripción base: nombre, precio, stock, marca.
+- `AlertaStockBajoDecorator`: agrega `| ⚠ STOCK BAJO` si `stock < 5`.
+- `EtiquetaMarcaPremiumDecorator`: agrega `| ★ MARCA PREMIUM` si marca ∈ {Samsung, Apple, Sony, LG}.
 
-| | Detalle |
-|---|--------|
-| **Problema real** | La “ficha” del producto en listados debe mostrar alertas distintas según stock y marca. Si cada regla se implementa con `if` sueltos en `ProductoService` o en el HTML del frontend, cada nueva etiqueta (por ejemplo “oferta vencida”, “envío gratis”) obliga a tocar los mismos métodos o plantillas y el código se vuelve un bloque de condiciones difícil de probar por separado. |
-| **Alternativa descartada** | **Herencia** (`Producto`, `ProductoConStockBajo`, `ProductoPremium`, combinaciones múltiples): crece en explosión de subclases al combinar reglas. **Strings armados en el controlador o en la vista:** viola MVC al mezclar presentación con HTTP o DOM. |
-| **Decisión** | Cadena de decoradores (`ProductoComponente` → alerta stock → marca premium) que envuelven la descripción base sin modificar la entidad `Producto` ni las consultas SQL. |
+**Problema real (dominio inventario)**
 
-### 3. Strategy (`src/patterns/strategy/PrecioStrategy.js`)
+En un listado de depósito, el encargado debe ver **de un vistazo** si hay que reponer stock y si el ítem es de marca premium, **sin cambiar** los datos guardados en la tabla `productos`. Esas reglas son de **presentación enriquecida**, no columnas nuevas en la BD: mañana puede pedirse “producto discontinuado” u “oferta del día” y las reglas se combinan (stock bajo **y** premium a la vez).
 
-Intercambia el algoritmo de cálculo de precio en tiempo de ejecución:
+**Alternativa descartada 1 — `if` encadenados en el servicio**
 
-| Estrategia | Regla |
-|------------|-------|
-| `lista` | Precio original |
-| `mayorista` | 15% de descuento |
-| `promocion` | 25% de descuento si stock ≥ 10 |
+```js
+// Anti-ejemplo: crece sin control
+let desc = `${p.nombre}...`;
+if (p.stock < 5) desc += ' | STOCK BAJO';
+if (esPremium(p.marca)) desc += ' | PREMIUM';
+// cada regla nueva = otro if en el mismo método
+```
 
-Se selecciona desde el frontend o con query: `GET /productos?estrategia=mayorista`
+- **Por qué se descarta:** viola abierto/cerrado; mezcla todas las reglas en un solo método; difícil testear cada regla aislada.
 
-| | Detalle |
-|---|--------|
-| **Problema real** | El mismo catálogo debe mostrarse con precio de lista, mayorista o promoción según el contexto del usuario, sin duplicar endpoints ni tablas en MySQL. La regla de promoción además depende del stock (`stock >= 10`), no solo de un porcentaje fijo. |
-| **Alternativa descartada** | **`if/else` o `switch` grande** dentro de `ProductoService` o del controlador: funciona con tres casos, pero cada nueva estrategia (por ejemplo “empleado”) rompe el principio abierto/cerrado y mezcla transporte HTTP con reglas de precio. **Tres rutas distintas** (`/productos-lista`, `/productos-mayorista`, …): repite listados y validaciones. |
-| **Decisión** | `PrecioContexto` delega en `PrecioListaStrategy`, `PrecioMayoristaStrategy` o `PrecioPromocionStrategy`; el servicio solo indica el tipo recibido por query o UI. |
+**Alternativa descartada 2 — Herencia**
 
-## Estructura del proyecto
+`class ProductoPremiumConStockBajo extends ProductoPremium extends Producto` …
+
+- **Por qué se descarta:** combinación de N reglas → explosión de subclases (2 decoradores = 4 clases posibles; 3 reglas = 8).
+
+**Alternativa descartada 3 — Lógica en el HTML (`index.html` / vista)**
+
+- **Por qué se descarta:** duplica reglas si mañana hay app móvil o otro cliente; la API debería devolver la misma semántica para todos los clientes.
+
+**Decisión (Decorator)**
+
+Cadena: `ProductoComponente` → `AlertaStockBajoDecorator` → `EtiquetaMarcaPremiumDecorator`. Cada clase envuelve al anterior y solo extiende `obtenerDescripcion()`. La entidad `Producto` y el SQL **no se modifican**.
+
+**Cómo defenderlo en oral (frase lista):** *“Decorator nos permite sumar etiquetas de forma composable; agregar una regla nueva es una clase más en la cadena, no tocar las existentes.”*
+
+**Prueba asociada (rama Albano):** `__tests__/ProductoDecorator.test.js`
+
+---
+
+### 3.4 Strategy
+
+**Archivo:** `src/patterns/strategy/PrecioStrategy.js`  
+**Uso:** `PrecioContexto` dentro de `ProductoService`; parámetro `?estrategia=` o selector en UI.
+
+| Estrategia | Clase | Regla |
+|------------|-------|--------|
+| `lista` | `PrecioListaStrategy` | Precio tal cual en BD |
+| `mayorista` | `PrecioMayoristaStrategy` | Precio × 0,85 (−15 %) |
+| `promocion` | `PrecioPromocionStrategy` | Precio × 0,75 solo si `stock >= 10` |
+
+**Problema real (dominio inventario)**
+
+La misma fila de producto se vende a **distintos tipos de cliente**: consumidor final (lista), comercio (mayorista) y campaña promocional (descuento condicionado al stock disponible). El precio base vive en MySQL; las reglas de descuento **cambian según contexto** y no deben duplicar productos ni tablas `productos_mayorista`, `productos_promo`, etc.
+
+**Alternativa descartada 1 — `switch` en el servicio**
+
+```js
+// Anti-ejemplo
+switch (tipo) {
+  case 'mayorista': return precio * 0.85;
+  case 'promocion': return producto.stock >= 10 ? precio * 0.75 : precio;
+  ...
+}
+```
+
+- **Por qué se descarta:** cada estrategia nueva obliga a editar el mismo `switch`; mezcla reglas de negocio en un solo bloque; el controlador podría tentarse a copiar lógica.
+
+**Alternativa descartada 2 — Tres endpoints**
+
+`/productos-lista`, `/productos-mayorista`, `/productos-promocion`
+
+- **Por qué se descarta:** triplica listados, validaciones y manejo de errores en Controller/Service.
+
+**Alternativa descartada 3 — Columnas extra en BD** (`precio_mayorista`, `precio_promo`)
+
+- **Por qué se descarta:** los precios derivados quedan desincronizados si cambia `precio` o `stock`; la promoción depende del stock **actual**, debe calcularse en tiempo de lectura.
+
+**Decisión (Strategy)**
+
+`PrecioContexto.establecerEstrategia(tipo)` intercambia el algoritmo en runtime. El servicio expone `precioCalculado` y `estrategia` en JSON sin que el modelo SQL conozca descuentos.
+
+**Cómo defenderlo en oral:** *“Strategy encapsula cada política de precio; el cliente elige la estrategia por query y el servicio solo delega en el contexto.”*
+
+**Pruebas asociadas (rama Albano):**
+
+- `__tests__/PrecioListaStrategy.test.js`
+- `__tests__/PrecioMayoristaStrategy.test.js`
+- `__tests__/PrecioPromocionStrategy.test.js`
+- `__tests__/ProductoService.test.js` (validaciones + integración con estrategia)
+
+---
+
+## 4. Ejecutar tests (`npm test`)
+
+> **Estado:** los tests están implementados en **`rama-AlbanoJulieta`** (Julieta). En **`rama-WindholzCristhian`** solo está la documentación hasta que el equipo unifique ramas. Tras el merge, esta sección aplica al repo unificado.
+
+### Requisitos
+
+- Node.js instalado.
+- En la carpeta del proyecto (con `package.json` que define el script `test`):
+
+```bash
+npm install
+npm test
+```
+
+El script ejecuta: `jest --runInBand` (tests en serie, más estable con mocks).
+
+### Qué se prueba (sin MySQL)
+
+| Archivo de test | Qué valida |
+|-----------------|------------|
+| `PrecioListaStrategy.test.js` | Precio sin modificar |
+| `PrecioMayoristaStrategy.test.js` | Descuento 15 % |
+| `PrecioPromocionStrategy.test.js` | 25 % solo con `stock >= 10` |
+| `ProductoDecorator.test.js` | Etiquetas stock bajo / marca premium |
+| `ProductoService.test.js` | `validarDatos`, errores `ValidationError` |
+
+- **No hace falta** XAMPP/MySQL corriendo: son pruebas **unitarias**.
+- Si se testea `ProductoModel` contra la BD real, hay que **mockear** `DatabaseSingleton` para no ejecutar SQL en Jest.
+
+### Salida esperada
+
+```
+PASS __tests__/...
+Test Suites: 5 passed
+```
+
+Si falla: revisar que estés en la rama con carpeta `__tests__/` y `jest` en `devDependencies`.
+
+---
+
+## 5. Git y trabajo en equipo
+
+### Ramas del repositorio
+
+| Rama | Responsable | Contenido principal |
+|------|-------------|---------------------|
+| `rama-AguirreClaudio` | Claudio | Proyecto MVC completo (backend, frontend, patrones, `server.js`) |
+| `rama-AlbanoJulieta` | Julieta | Misma base + **tests Jest**, validaciones, `.gitignore`; **referencia más actualizada** |
+| `rama-WindholzCristhian` | Cristhian | **Este README** (diagrama, 3.3, 3.4, listo, oral, Git) |
+
+### Flujo de trabajo acordado
+
+1. Cada integrante trabaja en **su rama** (entrega individual).
+2. La integración se hace al final sobre la rama más completa (`rama-AlbanoJulieta` recomendada como base).
+3. El README de `rama-WindholzCristhian` se fusiona para cumplir ítems de documentación de la consigna.
+
+### Cómo mergear el README actualizado
+
+**Opción A — Integrar documentación sobre la rama de Julieta (recomendada)**
+
+```bash
+git checkout rama-AlbanoJulieta
+git pull origin rama-AlbanoJulieta
+git merge rama-WindholzCristhian -m "docs: integrar README (diagrama, patrones 3.3/3.4, tests, oral)"
+```
+
+Si Git marca conflicto solo en `README.Md`, conservar las secciones de este archivo (diagrama Mermaid, 3.3, 3.4, criterio de listo, Git, oral) y combinar con cualquier detalle único que hubiera en la rama base.
+
+**Opción B — Traer código de Albano a la rama de Cristhian (solo si el profe pide entregar todo en tu rama)**
+
+```bash
+git checkout rama-WindholzCristhian
+git merge rama-AlbanoJulieta -m "merge: código y tests de referencia"
+# Resolver conflictos; mantener README.Md completo
+git push origin rama-WindholzCristhian
+```
+
+**Después del merge**
+
+```bash
+npm install
+npm start          # probar CRUD en http://localhost:3000
+npm test           # verificar tests de Julieta
+```
+
+### Commits sugeridos (individual)
+
+```bash
+# En rama-WindholzCristhian
+git add README.Md
+git commit -m "docs: diagrama, patrones 3.3/3.4, criterio listo, tests y guía oral"
+git push origin rama-WindholzCristhian
+```
+
+---
+
+## 6. Criterio de “listo”
+
+Marcar cuando esté verificado en la **rama unificada** (base `rama-AlbanoJulieta` + merge de documentación).
+
+### Documentación (rama Windholz — esta entrega)
+
+- [x] **Diagrama Mermaid** (§2): Navegador → API → Controller → Servicio → Modelo → Singleton → MySQL
+- [x] **Patrón 3.3 Decorator:** problema real + alternativas descartadas + decisión
+- [x] **Patrón 3.4 Strategy:** problema real + alternativas descartadas + decisión
+- [x] **Singleton 3.1** documentado con trade-off pool vs conexión única
+- [x] **Sección Git / equipo** (§5): ramas, roles, cómo mergear README
+- [x] **Guía defensa oral** (§7)
+- [ ] README fusionado sin conflictos en rama final del grupo
+
+### Código y funcionalidad (rama Albano / integrada)
+
+- [ ] MVC backend y frontend operativos
+- [ ] CRUD persiste en `tienda.productos`
+- [ ] Singleton, Decorator y Strategy en ejecución (`npm start`)
+- [ ] `npm test` — **5 suites en verde** (pendiente hasta merge con rama Albano)
+- [ ] Validaciones (`ValidationError` → HTTP 400)
+
+### Entrega final equipo
+
+- [ ] Merge de las tres ramas completado
+- [ ] Un solo README coherente con el código del repo
+- [ ] Demo oral ensayada con diagrama §2 y patrones §3
+
+---
+
+## 7. Guía para defensa oral
+
+Usar este guion de **2–3 minutos**; apoyarse en el diagrama del §2.
+
+### Apertura (20 s)
+
+*“Tenemos un CRUD de inventario con MVC en cliente y servidor, MySQL, y tres patrones: Singleton para la conexión, Strategy para precios según tipo de cliente, y Decorator para enriquecer la descripción en listados.”*
+
+### Recorrido del diagrama (40 s)
+
+1. El **navegador** solo habla HTTP/JSON.
+2. La **API** en Express enruta a **ProductoController**.
+3. El **servicio** valida y aplica Strategy + Decorator.
+4. El **modelo** ejecuta SQL vía **Singleton** hacia **MySQL**.
+
+*“Separar capas evita que el frontend conozca la BD o que el controlador calcule descuentos.”*
+
+### Singleton (30 s)
+
+- **Problema:** muchas conexiones o config duplicada.
+- **Descartamos:** pool (complejidad) y conexión por request (lento).
+- **Elegimos:** una instancia con `obtenerInstancia()`.
+
+### Decorator — 3.3 (30 s)
+
+- **Problema:** mostrar alertas de stock y marca premium sin nuevas columnas.
+- **Descartamos:** if gigante, herencia, lógica en HTML.
+- **Elegimos:** cadena de decoradores; ejemplo: TV LG con stock 3 → base + STOCK BAJO + MARCA PREMIUM.
+
+### Strategy — 3.4 (30 s)
+
+- **Problema:** mismo producto, precio según lista/mayorista/promo.
+- **Descartamos:** switch, tres endpoints, precios extra en BD.
+- **Elegimos:** `?estrategia=mayorista`; promoción depende de `stock >= 10`.
+
+### Tests (20 s)
+
+*“Julieta dejó tests unitarios con Jest; `npm test` no necesita MySQL porque prueban estrategias, decorator y validaciones del servicio.”*
+
+### Cierre (10 s)
+
+*“Mi aporte en la rama Windholz fue documentar arquitectura, diagrama y justificación de patrones para la consigna; el código de referencia está en la rama Albano hasta el merge final.”*
+
+### Preguntas frecuentes del profesor
+
+| Pregunta | Respuesta corta |
+|----------|-----------------|
+| ¿Por qué no pool? | MVP y consigna Singleton; pool para producción. |
+| ¿Dónde está el Decorator? | `ProductoService.enriquecerProducto` → `decorarProducto`. |
+| ¿Cómo cambio la estrategia? | Query `estrategia` o selector en UI → `PrecioContexto`. |
+| ¿Qué pasa si promoción y stock &lt; 10? | `PrecioPromocionStrategy` devuelve precio lista. |
+| ¿Controller tiene lógica de negocio? | No; solo HTTP y delega al servicio. |
+
+---
+
+## 8. Instalación, BD, ejecución y API
+
+### Estructura del proyecto (rama integrada)
 
 ```
 Parcial-1/
-├── server.js                 # Punto de entrada
+├── server.js
 ├── src/
-│   ├── config/
-│   │   └── DatabaseSingleton.js
-│   ├── models/
-│   ├── services/
-│   ├── controllers/
-│   ├── routes/
-│   └── patterns/
-│       ├── decorator/
-│       └── strategy/
-└── public/
-    ├── index.html
-    ├── style.css
-    └── js/
-        ├── models/
-        ├── views/
-        ├── controllers/
-        └── app.js
-└── __tests__/                # Pruebas unitarias con Jest
+│   ├── config/DatabaseSingleton.js
+│   ├── controllers/ProductoController.js
+│   ├── models/Producto.js, ProductoModel.js
+│   ├── services/ProductoService.js
+│   ├── routes/productoRoutes.js
+│   └── patterns/decorator/, strategy/
+├── public/          # frontend MVC
+└── __tests__/       # Jest (rama Albano)
 ```
 
-## Requisitos
+### Requisitos
 
 - [Node.js](https://nodejs.org/)
-- [XAMPP](https://www.apachefriends.org/) (MySQL) — solo necesario para ejecutar la app completa con persistencia
+- [XAMPP](https://www.apachefriends.org/) (MySQL) — para ejecutar la app con persistencia
 
-## Instalación
+### Instalación
 
 ```bash
 npm install
 ```
 
-## Base de datos
-
-En phpMyAdmin:
+### Base de datos
 
 ```sql
 CREATE DATABASE IF NOT EXISTS tienda;
@@ -174,30 +439,17 @@ CREATE TABLE IF NOT EXISTS productos (
 );
 ```
 
-Configuración MySQL en `src/config/DatabaseSingleton.js` (host, user, password, database).
+Credenciales en `src/config/DatabaseSingleton.js` (host, user, password, database).
 
-## Ejecución
+### Ejecución
 
 ```bash
 npm start
 ```
 
-Abrir en el navegador: **http://localhost:3000**
+Abrir **http://localhost:3000** (frontend y API en el mismo puerto).
 
-El servidor sirve el frontend y la API en el mismo puerto.
-
-## Pruebas
-
-Ejecutar las pruebas unitarias con:
-
-```bash
-npm test
-```
-
-- Los tests son unitarios y no requieren que XAMPP o MySQL estén ejecutándose.
-- Si se testea `src/models/ProductoModel.js`, debe mockearse `src/config/DatabaseSingleton.js` para evitar ejecutar SQL directo en las pruebas.
-
-## API REST
+### API REST
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
@@ -206,38 +458,3 @@ npm test
 | POST | `/productos` | Crear |
 | PUT | `/productos/:id` | Actualizar |
 | DELETE | `/productos/:id` | Eliminar |
-
-## Criterio de “listo”
-
-El proyecto se considera **listo para entregar / unificar** cuando se cumple todo lo siguiente (verificable en la rama integrada, referencia: `rama-AlbanoJulieta`):
-
-### Consigna y documentación
-
-- [ ] **Diagrama** en este README (Mermaid): Navegador → API → Controller → Servicio → Modelo → Singleton → MySQL.
-- [ ] **Patrones documentados** con problema real y alternativa descartada (Singleton, Decorator, Strategy).
-- [ ] README con stack, estructura, instalación, BD, ejecución y API.
-
-### Arquitectura y código
-
-- [ ] **MVC backend**: rutas → controlador → servicio → modelo; entidad `Producto` separada de SQL.
-- [ ] **MVC frontend**: `ProductoApiModel`, `ProductoView`, `ProductoUIController`.
-- [ ] **Singleton** en `DatabaseSingleton.js`; el modelo no crea conexiones propias.
-- [ ] **Decorator** aplicado en listados/detalle (`descripcion` enriquecida).
-- [ ] **Strategy** seleccionable vía `?estrategia=` (lista, mayorista, promocion).
-
-### Funcionalidad
-
-- [ ] CRUD completo de productos persiste en MySQL (`tienda.productos`).
-- [ ] Validaciones de negocio en servicio (`ValidationError` → HTTP 400).
-- [ ] Frontend en `http://localhost:3000` consume la API sin errores de CORS en entorno local.
-
-### Calidad
-
-- [ ] `npm start` levanta servidor y sirve `public/`.
-- [ ] `npm test` pasa (tests de Strategy, Decorator y/o Service según rama).
-- [ ] Credenciales y rutas de BD documentadas o alineadas con XAMPP local del equipo.
-
-### Integración final (equipo)
-
-- [ ] Ramas individuales fusionadas en una rama principal sin conflictos en `README.Md` y `src/`.
-- [ ] Tras el merge, el diagrama y las rutas del README coinciden con los archivos reales del repo unificado.
