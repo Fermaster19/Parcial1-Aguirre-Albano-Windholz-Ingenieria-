@@ -11,6 +11,19 @@ class ProductoView {
         this.lista.innerHTML = '';
     }
 
+    /**
+     * Único punto de escritura en #lista fuera de renderizarLista (vista dueña del DOM).
+     */
+    mostrarMensajeLista(mensaje, esError = false) {
+        this.limpiarLista();
+        const item = document.createElement('li');
+        if (esError) {
+            item.className = 'mensaje-error';
+        }
+        item.textContent = mensaje;
+        this.lista.appendChild(item);
+    }
+
     renderizarLista(productos) {
         this.limpiarLista();
 

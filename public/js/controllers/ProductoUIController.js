@@ -36,8 +36,7 @@ class ProductoUIController {
             this.productosCache = productos;
             this.vista.renderizarLista(productos);
         } catch {
-            this.vista.limpiarLista();
-            this.vista.lista.innerHTML = '<li class="mensaje-error">Error de conexión con el servidor</li>';
+            this.vista.mostrarMensajeLista('Error de conexión con el servidor', true);
         }
     }
 
