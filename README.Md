@@ -100,6 +100,7 @@ Parcial-1/
         ├── views/
         ├── controllers/
         └── app.js
+└── __tests__/                # Pruebas unitarias con Jest
 ```
 
 ## Requisitos
