@@ -390,6 +390,24 @@ origin
 | **Albano Julieta** | `rama-AlbanoJulieta` | Todo lo anterior + **tests Jest**, `ValidationError`, `.gitignore`, ajustes finales; **rama de referencia para ejecutar** `npm start` y `npm test` | `__tests__/`, `package.json` (script `test`) |
 | **Windholz Cristhian** | `rama-WindholzCristhian` | **Documentaci├│n:** diagrama Mermaid, patrones 3.3/3.4 (problema + alternativa), Git, [gu├¡a install/run/test](#gu├¡a-r├ípida-install--run--test), [defensa oral ┬º7](#7-defensa-oral-gu├¡a-defendible) | `README.md` |
 
+### Tabla integrante ↔ commits (evidencia 50/50)
+
+Commits reales del historial del repositorio (rama `rama-WindholzCristhian` tras integrar las tres ramas). Verificación: `git shortlog -sn` y `git log --oneline`.
+
+| Integrante | Autor en Git | Rama | Commits (ejemplos) | Rol |
+|------------|--------------|------|-------------------|-----|
+| **Aguirre Claudio** | `Fermaster19` | `rama-AguirreClaudio` | `5b8bfa4` first commit · `d5388ea` capa servicio + refactor controlador · `a8cd394` trade-off Singleton · `4877b20` validación en servicio (`ValidationError`) | Backend MVC, patrones, API |
+| **Albano Julieta** | `albano-juli` | `rama-AlbanoJulieta` | `cd99e4a` Jest + script `npm test` · `0c3074e` test PrecioLista · `a6a5352` test Decorator · `6834582` documentación tests sin XAMPP | Tests y ajustes finales |
+| **Windholz Cristhian** | `Windholz-CV` | `rama-WindholzCristhian` | `0ac5fbf` diagrama Mermaid · `508a44f` patrones 3.3/3.4 · `f488716` fix MVC vista (`mostrarMensajeLista`) · `619fc89` guion defensa oral | README, diagrama, Git, oral |
+
+| Integrante | Cantidad de commits en historial unificado |
+|------------|---------------------------------------------|
+| Aguirre Claudio | 7 |
+| Albano Julieta | 9 |
+| Windholz Cristhian | 11 |
+
+**Total:** 3 autores, 27+ commits (no solo `first commit`). Cada integrante aportó en su rama antes del merge final.
+
 ### Flujo acordado
 
 1. Cada uno hace **commit/push en su rama** (sin tocar la de los dem├ís hasta el merge).
@@ -448,7 +466,7 @@ Marcar cuando est├® verificado en la **rama unificada** (base `rama-AlbanoJul
 - [x] **Patr├│n 3.3 Decorator:** problema real + alternativas descartadas + decisi├│n
 - [x] **Patr├│n 3.4 Strategy:** problema real + alternativas descartadas + decisi├│n
 - [x] **Singleton 3.1** documentado con trade-off pool vs conexi├│n ├║nica
-- [x] **Secci├│n Git / equipo** (┬º5): ramas, roles, c├│mo mergear README
+- [x] **Sección Git / equipo** (§5): ramas, roles, tabla integrante ↔ commits (50/50), cómo mergear README
 - [x] **Gu├¡a install + run + test** (secci├│n r├ípida al inicio)
 - [x] **Secci├│n ejecutar tests** (┬º4) ÔÇö referencia rama Albano
 - [x] **Guía defensa oral defendible** (§7 + [docs/DEFENSA-ORAL.md](docs/DEFENSA-ORAL.md))
