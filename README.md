@@ -6,7 +6,7 @@
 |------------|------------------|
 | Aguirre Claudio | Backend MVC, patrones, API REST, estructura `src/` y `public/` |
 | Albano Julieta | Tests con Jest, validaciones, integración y rama de referencia más actualizada |
-| Windholz Cristhian | Documentación (`README.Md`): diagrama, patrones 3.3/3.4, guía install/run/test, tests (§4), Git (§5), defensa oral (§7) |
+| Windholz Cristhian | Documentación (`README.md`): diagrama, patrones 3.3/3.4, guía install/run/test, tests (§4), Git (§5), defensa oral (§7) |
 
 Aplicación CRUD de inventario de productos que cumple **arquitectura MVC** y tres **patrones de diseño**: Singleton, Decorator y Strategy.
 
@@ -387,7 +387,7 @@ origin
 |------------|------|----------------------|----------------|
 | **Aguirre Claudio** | `rama-AguirreClaudio` | Backend/frontend MVC, API REST, patrones Singleton / Decorator / Strategy, `server.js`, estructura `src/` y `public/` | `src/controllers/`, `src/services/`, `src/patterns/`, `public/js/` |
 | **Albano Julieta** | `rama-AlbanoJulieta` | Todo lo anterior + **tests Jest**, `ValidationError`, `.gitignore`, ajustes finales; **rama de referencia para ejecutar** `npm start` y `npm test` | `__tests__/`, `package.json` (script `test`) |
-| **Windholz Cristhian** | `rama-WindholzCristhian` | **Documentación:** diagrama Mermaid, patrones 3.3/3.4 (problema + alternativa), Git, [guía install/run/test](#guía-rápida-install--run--test), [defensa oral §7](#7-defensa-oral-guía-defendible) | `README.Md` |
+| **Windholz Cristhian** | `rama-WindholzCristhian` | **Documentación:** diagrama Mermaid, patrones 3.3/3.4 (problema + alternativa), Git, [guía install/run/test](#guía-rápida-install--run--test), [defensa oral §7](#7-defensa-oral-guía-defendible) | `README.md` |
 
 ### Flujo acordado
 
@@ -411,7 +411,7 @@ git pull origin rama-AlbanoJulieta
 # 3. Integrar README de Cristhian
 git merge rama-WindholzCristhian -m "docs: README diagrama, patrones, install/run/test, oral"
 
-# 4. Si hay conflicto en README.Md:
+# 4. Si hay conflicto en README.md:
 #    - Conservar diagrama Mermaid, §3.3, §3.4, guía rápida, §4 tests, §5 Git, §7 oral
 #    - Conservar de la rama base cualquier detalle de API/BD que no esté duplicado
 
@@ -424,13 +424,13 @@ npm start   # CRUD + MySQL (XAMPP)
 git push origin rama-AlbanoJulieta
 ```
 
-**Alternativa** (entregar todo en rama Windholz): mergear `rama-AlbanoJulieta` → `rama-WindholzCristhian` y resolver conflictos dejando este `README.Md` completo.
+**Alternativa** (entregar todo en rama Windholz): mergear `rama-AlbanoJulieta` → `rama-WindholzCristhian` y resolver conflictos dejando este `README.md` completo.
 
 ### Commits en rama individual (Cristhian)
 
 ```bash
 git checkout rama-WindholzCristhian
-git add README.Md
+git add README.md
 git commit -m "docs: install/run/test, tests Albano, Git, defensa oral"
 git push origin rama-WindholzCristhian
 ```
