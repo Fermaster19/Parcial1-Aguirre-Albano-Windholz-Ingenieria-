@@ -6,7 +6,7 @@
 |------------|------------------|
 | Aguirre Claudio | Backend MVC, patrones, API REST, estructura `src/` y `public/` |
 | Albano Julieta | Tests con Jest, validaciones, integraci├│n y rama de referencia m├ís actualizada |
-| Windholz Cristhian | Documentación (`README.md`, `docs/DEFENSA-ORAL.md`): diagrama, patrones 3.3/3.4, install/run/test, Git, defensa oral |
+| Windholz Cristhian | Documentación (`README.md`, `docs/ENSAYO-DEFENSA-ORAL.md`, `docs/DEFENSA-ORAL.md`): diagrama, patrones, install/run/test, Git, defensa oral |
 
 Aplicaci├│n CRUD de inventario de productos que cumple **arquitectura MVC** y tres **patrones de dise├▒o**: Singleton, Decorator y Strategy.
 
@@ -25,6 +25,7 @@ Aplicaci├│n CRUD de inventario de productos que cumple **arquitectura MVC** 
 5. [Git y trabajo en equipo](#5-git-y-trabajo-en-equipo)
 6. [Criterio de ÔÇ£listoÔÇØ](#6-criterio-de-listo)
 7. [Defensa oral (guía defendible)](#7-defensa-oral-guía-defendible)
+- [Ensayo completo de defensa (documento)](docs/ENSAYO-DEFENSA-ORAL.md)
 - [Apéndice: preguntas incómodas (oral)](docs/DEFENSA-ORAL.md)
 8. [API REST y base de datos](#8-api-rest-y-base-de-datos)
 
